@@ -1,0 +1,45 @@
+```
+name: GATEWAY-X™ Autonomous Engine &amp; SLA Auditor
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  scaffold-test-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 1. Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 2. Set Up Python 3.12 Runtime
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 3. Unpack Architecture &amp; Run Full 9-Scenario SLA Audit
+        run: |
+          python setup.py
+
+      - name: 4. Autonomous Commit &amp; Push Generated Architecture
+        run: |
+          git config user.name "GatewayX-Autonomous-Bot"
+          git config user.email "bot@greensol-consortium.com"
+          git add -A
+          if git diff --staged --quiet; then
+            echo "No structural changes detected. Repository is up-to-date."
+          else
+            git commit -m "chore(auto): scaffold production modules, web consoles &amp; master test harness [skip ci]"
+            git push origin main
+          fi
+
+      - name: 5. Verify Core Pytest Suite
+        run: |
+          python -m unittest discover -s tests -p "test_*.py" -v
