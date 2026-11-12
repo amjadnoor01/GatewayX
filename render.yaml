@@ -1,0 +1,1 @@
+services: - type: web name: gatewayx-console runtime: docker dockerfilePath: ./docker/Dockerfile plan: free healthCheckPath: /api/health autoDeploy: true
